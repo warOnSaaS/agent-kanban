@@ -152,9 +152,9 @@ test('ideas board and comments, alerts to everyone, search and fetch', async () 
 test('board: sign-in page without a session, the board with one', async () => {
   assert.match(await (await fetch(`${base}/board`)).text(), /SIGN IN WITH GITHUB/);
   const html = await boardAs('sam');
-  assert.match(html, /SIGN OUT SAM/);
-  assert.match(html, /aria-label="IDEAS"/);
-  assert.match(html, /aria-label="TO DO"/);
+  assert.match(html, /Sign out Sam/);
+  assert.match(html, /aria-label="Ideas"/);
+  assert.match(html, /aria-label="To do"/);
   assert.match(html, /Draft the PTO policy/);
   assert.match(html, /Remote work policy/);
   assert.doesNotMatch(html, /text-transform:\s*uppercase/);
@@ -195,7 +195,7 @@ test('hand off: Jordan logs his finished work and passes the next step to Sam, w
   await sam.call('update_task', { task: id, status: 'doing', comment: 'Booked the walkthrough for Thursday' });
   assert.doesNotMatch((await sam.call('my_day')).text, /Website rebuild and AI case intake\*\*.*Use open_task/);
   assert.match((await jordan.call('my_alerts')).text, /Booked the walkthrough/);
-  assert.match(await boardAs('sam'), /kcard-turn">YOUR TURN/);
+  assert.match(await boardAs('sam'), /chip chip-accent">Your turn/);
 });
 
 test('unassigned, review, unopened, meet to discuss', async () => {
@@ -380,8 +380,8 @@ test('sent back shows up for the original sender, and status shows where everyth
   assert.match((await sam.call('status', { client: 'acme' })).text, /Where things stand: acme/);
   const board = await boardAs('sam');
   assert.match(board, /class="kanban"/);
-  assert.match(board, /aria-label="DOING"/);
-  assert.match(board, /SENT BACK/);
+  assert.match(board, /aria-label="Doing"/);
+  assert.match(board, /Sent back/);
 });
 
 test('review pulls in the actual work and asks for a short verdict', async () => {
@@ -525,9 +525,11 @@ test('web board: cards open to pages, review from the page, actions go through t
   assert.match(board, new RegExp(`href="/board/t/${id}"`));
   assert.match(board, /data-task="/);
   const page = await pageAs('sam', `/board/t/${id}`);
-  assert.match(page, /YOUR REVIEW/);
-  assert.match(page, /href="https:\/\/example\.com\/onboarding"[^>]*>OPEN ONBOARDING PAGE/);
-  assert.match(page, /<li>Built the onboarding page<\/li>/);
+  assert.match(page, /Jordan asked you to review this/);
+  assert.match(page, /<a class="linkcard" href="https:\/\/example\.com\/onboarding"[^>]*><b>Onboarding page<\/b>/);
+  assert.match(page, /<ul class="checks"><li>Built the onboarding page<\/li>/);
+  assert.match(page, /<ol class="steps"><li><div>Approve the onboarding page<\/div>/);
+  assert.match(page, /data-reveal="send-back"/);
   assert.match(page, /data-tool="update_task"/);
 
   // Without our header, a cookie alone can't act (another site posting a form).
@@ -535,10 +537,10 @@ test('web board: cards open to pages, review from the page, actions go through t
   // Send back from the page's form.
   const sent = await actAs('sam', 'hand_off', { task: id, to: 'jordan', what_i_did: 'Reviewed it', whats_next: 'Make the button bigger' });
   assert.equal(sent.status, 200);
-  assert.match(await pageAs('jordan', `/board/t/${id}`), /SENT BACK/);
+  assert.match(await pageAs('jordan', `/board/t/${id}`), /Sent back/);
   // Drag to DOING is one update_task call.
   assert.equal((await actAs('jordan', 'update_task', { task: id, status: 'doing' })).status, 200);
-  assert.match(await pageAs('jordan', `/board/t/${id}`), /<span class="status">DOING<\/span>/);
+  assert.match(await pageAs('jordan', `/board/t/${id}`), /<span class="chip chip-outline">Doing<\/span>/);
   // Casey (Birch only) can't open or act on an Acme task.
   assert.match(await pageAs('casey', `/board/t/${id}`), /do not have access/);
   assert.equal((await actAs('casey', 'update_task', { task: id, status: 'done' })).status, 400);
@@ -546,12 +548,12 @@ test('web board: cards open to pages, review from the page, actions go through t
 
 test('web board: MINE filter, ideas column and idea pages, new task from the board, alerts, sign out', async () => {
   const mine = await pageAs('jordan', '/board?view=mine');
-  assert.match(mine, /aria-current="page">MINE/);
+  assert.match(mine, /aria-current="page">Mine/);
   assert.doesNotMatch(mine, /Get sign-off on the employee handbook/);
   const all = await boardAs('jordan');
   const ideaHref = /href="(\/board\/i\/[^"]+)"/.exec(all)[1];
   const idea = await pageAs('jordan', ideaHref);
-  assert.match(idea, /TURN INTO A TASK/);
+  assert.match(idea, /Turn into a task/);
   assert.equal((await actAs('jordan', 'add_task', { client: 'acme-dental', title: 'From the web board', assignee: 'nobody' })).status, 200);
   assert.match(await boardAs('jordan'), /From the web board/);
   const alerts = await pageAs('sam', '/board/alerts');
