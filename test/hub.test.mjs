@@ -415,6 +415,7 @@ test('INSTRUCTIONS.md is one generic file: no secrets, agent identifies itself, 
   const v = await (await fetch(`${base}/INSTRUCTIONS.md`)).text();
   assert.match(v, /# Set up Example Co on agent-kanban/);
   assert.match(v, /## Step 0: work out what you are/);
+  assert.match(v, /\*\*Agent: start now\.\*\*/);
   assert.match(v, /Claude Code or Codex/);
   assert.ok(v.includes(`claude mcp add --transport http --scope user agent-kanban ${base}/mcp`));
   assert.ok(v.includes(`codex mcp add agent-kanban --url ${base}/mcp`));
