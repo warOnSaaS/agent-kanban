@@ -416,6 +416,8 @@ test('INSTRUCTIONS.md is one generic file: no secrets, agent identifies itself, 
   assert.match(v, /# Set up Example Co on agent-kanban/);
   assert.match(v, /## Step 0: work out what you are/);
   assert.match(v, /\*\*Agent: start now\.\*\*/);
+  assert.doesNotMatch(v, /I'm Claude Code/);
+  assert.match(v, /never tell them what you are/);
   // Step 0 lists the four paths; each path's steps appear once, under Step 2.
   assert.match(v, /- \*\*A\. Claude Code or Codex\*\* \(you can run terminal commands\)\n- \*\*B\. The Claude app\*\* \(claude\.ai[^)]*\)\n- \*\*C\. ChatGPT\*\*\n- \*\*D\. Something else\*\*/);
   assert.equal(v.split('Add custom connector').length - 1, 1);
