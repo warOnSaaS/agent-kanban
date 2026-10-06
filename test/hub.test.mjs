@@ -342,7 +342,7 @@ test('whoever handed work over hears the review result, even on a task someone e
 test('short commands: start shows what is assigned and the four commands', async () => {
   const sam = await as('sam');
   const tools = (await sam.c.listTools()).tools;
-  assert.ok(tools.some((t) => t.name === 'start' && /types "start"/.test(t.description)));
+  assert.ok(tools.some((t) => t.name === 'start' && /types "agent-kanban start", "start"/.test(t.description)));
   assert.ok(tools.some((t) => t.name === 'my_day' && /check tasks/.test(t.description) && /what's assigned to me/.test(t.description)));
   assert.ok(tools.some((t) => t.name === 'hand_off' && /hand off task/.test(t.description)));
   const s = await sam.call('start');
@@ -429,6 +429,8 @@ test('INSTRUCTIONS.md is one generic file: no secrets, agent identifies itself, 
   assert.ok(v.includes(`claude mcp add --transport http --scope user agent-kanban ${base}/mcp`));
   assert.ok(v.includes(`codex mcp add agent-kanban --url ${base}/mcp`));
   assert.match(v, /codex mcp login agent-kanban/);
+  assert.ok(v.split('agent-kanban start').length - 1 >= 4, 'every path resumes with agent-kanban start');
+  assert.doesNotMatch(v, /then type \*\*start\*\*/);
   assert.match(v, /\[Claude connector settings\]\(https:\/\/claude\.ai\/settings\/connectors\)/);
   assert.ok(v.includes('```\n   ' + base + '/mcp\n   ```'));
   assert.match(v, /do you have a GitHub account\?/);
