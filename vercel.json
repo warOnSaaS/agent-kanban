@@ -1,0 +1,75 @@
+{
+  "rewrites": [
+    {
+      "source": "/mcp",
+      "destination": "/api/mcp"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource",
+      "destination": "/api/wellknown?doc=resource"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource/mcp",
+      "destination": "/api/wellknown?doc=resource"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "/api/wellknown?doc=server"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server/mcp",
+      "destination": "/api/wellknown?doc=server"
+    },
+    {
+      "source": "/oauth/github/callback",
+      "destination": "/api/oauth?step=github-callback"
+    },
+    {
+      "source": "/oauth/:step",
+      "destination": "/api/oauth?step=:step"
+    },
+    {
+      "source": "/login",
+      "destination": "/api/oauth?step=login"
+    },
+    {
+      "source": "/board",
+      "destination": "/api/board"
+    },
+    {
+      "source": "/instructions",
+      "destination": "/api/instructions"
+    },
+    {
+      "source": "/INSTRUCTIONS.md",
+      "destination": "/api/instructions"
+    },
+    {
+      "source": "/v1/:tool",
+      "destination": "/api/v1?tool=:tool"
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "/api/openapi"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/api/home?page=privacy"
+    },
+    {
+      "source": "/",
+      "destination": "/api/home"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# Who is on the team and what they can see. Everyone signs in with GitHub.
+#   github:  their GitHub username. Sign-in is matched on this.
+#   email:   optional. If github is missing, the first sign-in from a GitHub account
+#            with this verified email links them and fills in github automatically.
+#   role:    owner sees everything (and gets the repo itself); team sees the clients listed.
+#   clients: all, or a list of client folder names.
+
+people:
+  - id: sam
+    name: Sam Rivera
+    title: Founder
+    role: owner
+    github: sam-rivera-example
+    email: sam@example.com
+    clients: all
+
+  - id: jordan
+    name: Jordan Lee
+    title: Builds the websites and automations
+    role: team
+    github: jordan-lee-example
+    clients: [acme-dental]
+
+  - id: casey
+    name: Casey Park
+    title: Assistant
+    role: team
+    github: casey-park-example
+    clients: [birch-law]
+
+  - id: riley
+    name: Riley Chen
+    title: Assistant (not signed in yet)
+    role: team
+    email: riley@example.com
+    clients: [acme-dental]
