@@ -416,6 +416,10 @@ test('INSTRUCTIONS.md is one generic file: no secrets, agent identifies itself, 
   assert.match(v, /# Set up Example Co on agent-kanban/);
   assert.match(v, /## Step 0: work out what you are/);
   assert.match(v, /\*\*Agent: start now\.\*\*/);
+  // Step 0 lists the four paths; each path's steps appear once, under Step 2.
+  assert.match(v, /- \*\*A\. Claude Code or Codex\*\* \(you can run terminal commands\)\n- \*\*B\. The Claude app\*\* \(claude\.ai[^)]*\)\n- \*\*C\. ChatGPT\*\*\n- \*\*D\. Something else\*\*/);
+  assert.equal(v.split('Add custom connector').length - 1, 1);
+  assert.doesNotMatch(v, /Send, as three lines/);
   assert.match(v, /Claude Code or Codex/);
   assert.ok(v.includes(`claude mcp add --transport http --scope user agent-kanban ${base}/mcp`));
   assert.ok(v.includes(`codex mcp add agent-kanban --url ${base}/mcp`));
