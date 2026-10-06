@@ -485,3 +485,19 @@ test('view kanban: the board drawn in the chat, via MCP Apps and ChatGPT widgets
   assert.doesNotMatch(c.structuredContent.html, /Acme Dental|Partner compensation/);
   assert.match(c.structuredContent.html, /Remote work policy/);
 });
+
+test('personal setup link: owner gets one, it names the person and their GitHub email, and cannot be forged', async () => {
+  const sam = await as('sam');
+  const r = (await sam.call('invite_link', { person: 'Riley' })).text;
+  const url = /(http\S+INSTRUCTIONS\.md\?for=\S+)/.exec(r)[1];
+  const v = await (await fetch(url)).text();
+  assert.match(v, /You are helping \*\*Riley Chen\*\* join/);
+  assert.match(v, /Sign up with \*\*riley@example\.com\*\*/);
+  assert.match(v, /Make sure \*\*riley@example\.com\*\* is one of its emails/);
+  assert.match(v, /\[github\.com\/signup\]\(https:\/\/github\.com\/signup\)/);
+  const forged = await (await fetch(`${base}/INSTRUCTIONS.md?for=${encodeURIComponent('eyJrIjoiaW52aXRlIiwiaWQiOiJyaWxleSJ9.forged')}`)).text();
+  assert.doesNotMatch(forged, /riley@example\.com|Riley Chen/);
+  assert.match(forged, /You are helping someone join/);
+  const jordan = await as('jordan');
+  assert.ok(!(await jordan.c.listTools()).tools.some((t) => t.name === 'invite_link'));
+});
