@@ -148,10 +148,21 @@ test('ideas board and comments, alerts to everyone, search and fetch', async () 
 });
 
 test('board: sign-in page without a session, the board with one', async () => {
-  assert.match(await (await fetch(`${base}/board`)).text(), /Sign in with GitHub/);
+  assert.match(await (await fetch(`${base}/board`)).text(), /SIGN IN WITH GITHUB/);
   const html = await boardAs('sam');
-  assert.match(html, /Sam's workspace/);
-  assert.match(html, /Acme Dental/);
+  assert.match(html, /agent-kanban · Sam/);
+  assert.match(html, /aria-label="TO DO"/);
+  assert.match(html, /Draft the PTO policy/);
+  assert.match(html, /Remote work policy/);
+  assert.doesNotMatch(html, /text-transform:\s*uppercase/);
+  // Client tab: only that client's cards.
+  const acme = await fetch(`${base}/board?client=acme-dental`, { headers: { cookie: `ak_session=${encodeURIComponent(tokens.sam)}` } }).then((r) => r.text());
+  assert.match(acme, /aria-current="page">Acme Dental/);
+  assert.match(acme, /Draft the PTO policy/);
+  assert.doesNotMatch(acme, /Remote work policy/);
+  // Jordan only has Acme: Birch's cards and tab never show.
+  const j = await boardAs('jordan');
+  assert.doesNotMatch(j, /Birch Law|Remote work policy/);
 });
 test('hand off: Jordan logs his finished work and passes the next step to Sam, whose agent picks it up', async () => {
   const jordan = await as('jordan');
@@ -181,7 +192,7 @@ test('hand off: Jordan logs his finished work and passes the next step to Sam, w
   await sam.call('update_task', { task: id, status: 'doing', comment: 'Booked the walkthrough for Thursday' });
   assert.doesNotMatch((await sam.call('my_day')).text, /Website rebuild and AI case intake\*\*.*Use open_task/);
   assert.match((await jordan.call('my_alerts')).text, /Booked the walkthrough/);
-  assert.match(await boardAs('sam'), /not opened yet/);
+  assert.match(await boardAs('sam'), /<span class="status">(NEW|REVIEW)<\/span>/);
 });
 
 test('unassigned, review, unopened, meet to discuss', async () => {
@@ -343,7 +354,7 @@ test('short commands: start shows what is assigned and the four commands', async
 test('the four commands are MCP prompts', async () => {
   const { c } = await as('sam');
   const names = (await c.listPrompts()).prompts.map((p) => p.name);
-  assert.deepEqual(names, ['start', 'check-tasks', 'review', 'new-task', 'assign-task', 'hand-off-task', 'status']);
+  assert.deepEqual(names, ['start', 'check-tasks', 'review', 'new-task', 'assign-task', 'hand-off-task', 'status', 'view-kanban']);
   const p = await c.getPrompt({ name: 'hand-off-task' });
   assert.equal(p.messages[0].content.text, 'hand off task');
 });
@@ -365,8 +376,8 @@ test('sent back shows up for the original sender, and status shows where everyth
   assert.match(st, /## Done in the last 2 weeks\n(- .*\n)*- \[done\]/);
   assert.match((await sam.call('status', { client: 'acme' })).text, /Where things stand: acme/);
   const board = await boardAs('sam');
-  assert.match(board, /Where things stand/);
-  assert.match(board, /In progress \(/);
+  assert.match(board, /class="kanban"/);
+  assert.match(board, /aria-label="DOING"/);
   assert.match(board, /SENT BACK/);
 });
 
@@ -420,4 +431,51 @@ test('start offers the review walkthrough when something is waiting', async () =
   await jordan.call('hand_off', { client: 'Acme', title: 'Walkthrough demo', to: 'Sam', needs: 'review', what_i_did: 'Built it', whats_next: 'Approve it', links: ['https://example.com'] });
   const s = (await (await as('sam')).call('start')).text;
   assert.match(s, /sent you something to review: .*Want to see it\?/);
+});
+
+test('sees: own hides tasks assigned to anyone else, everywhere', async () => {
+  const sam = await as('sam');
+  await sam.call('add_task', { client: 'Birch', title: 'Partner compensation review', assignee: 'me' });
+  await sam.call('add_task', { client: 'Birch', title: 'Birch intake form refresh', assignee: 'nobody' });
+  const casey = await as('casey');
+  const st = (await casey.call('status')).text;
+  assert.match(st, /Remote work policy/);
+  assert.match(st, /Birch intake form refresh/);
+  assert.doesNotMatch(st, /Partner compensation review/);
+  assert.doesNotMatch((await casey.call('find_tasks', { client: 'Birch' })).text, /Partner compensation/);
+  assert.ok(!JSON.parse((await casey.call('search', { query: 'partner compensation' })).text).results.some((r) => r.id.includes('partner-compensation')));
+  assert.ok((await casey.call('open_task', { task: 'partner-compensation' })).error);
+  assert.doesNotMatch(await boardAs('casey'), /Partner compensation/);
+  // Sam (owner) sees it all.
+  assert.match((await sam.call('status', { client: 'Birch' })).text, /Partner compensation review/);
+});
+
+test('view kanban: the board drawn in the chat, via MCP Apps and ChatGPT widgets, respecting access', async () => {
+  const sam = await as('sam');
+  const tools = (await sam.c.listTools()).tools;
+  const vk = tools.find((t) => t.name === 'view_kanban');
+  assert.equal(vk._meta.ui.resourceUri, 'ui://agent-kanban/kanban.html');
+  assert.equal(vk._meta['openai/outputTemplate'], 'ui://agent-kanban/kanban-openai.html');
+  const res = (await sam.c.listResources()).resources;
+  assert.ok(res.some((r) => r.uri === 'ui://agent-kanban/kanban.html' && r.mimeType === 'text/html;profile=mcp-app'));
+  assert.ok(res.some((r) => r.uri === 'ui://agent-kanban/kanban-openai.html' && r.mimeType === 'text/html+skybridge'));
+  const page = (await sam.c.readResource({ uri: 'ui://agent-kanban/kanban.html' })).contents[0];
+  assert.match(page.text, /ui\/initialize/);
+  assert.match(page.text, /window\.openai/);
+  assert.match(page.text, /\.kanban \{/);
+
+  const r = await sam.c.callTool({ name: 'view_kanban', arguments: {} });
+  assert.match(r.structuredContent.html, /class="kanban"/);
+  assert.match(r.structuredContent.html, /Draft the PTO policy/);
+  assert.match(r.structuredContent.summary, /OPEN/);
+  assert.match(r.content[0].text, /\/board/);
+  const birch = await sam.c.callTool({ name: 'view_kanban', arguments: { client: 'birch' } });
+  assert.match(birch.structuredContent.title, /BIRCH LAW/);
+  assert.doesNotMatch(birch.structuredContent.html, /Draft the PTO policy/);
+
+  // Casey (birch only, sees own): no Acme cards, no tasks assigned to others.
+  const casey = await as('casey');
+  const c = await casey.c.callTool({ name: 'view_kanban', arguments: {} });
+  assert.doesNotMatch(c.structuredContent.html, /Acme Dental|Partner compensation/);
+  assert.match(c.structuredContent.html, /Remote work policy/);
 });

@@ -4,6 +4,8 @@
 #            with this verified email links them and fills in github automatically.
 #   role:    owner sees everything (and gets the repo itself); team sees the clients listed.
 #   clients: all, or a list of client folder names.
+#   sees:    optional. "own" = on their clients, only tasks assigned to them, created or handed
+#            off by them, or unassigned. Tasks assigned to anyone else are invisible to them.
 
 people:
   - id: sam
@@ -27,6 +29,7 @@ people:
     role: team
     github: casey-park-example
     clients: [birch-law]
+    sees: own
 
   - id: riley
     name: Riley Chen

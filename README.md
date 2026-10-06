@@ -2,17 +2,18 @@
 
 A shared kanban for people **and their agents**. Tasks, hand-offs, reviews, notes and ideas live as files in a private GitHub repo. Everyone works on them from the agent they already use: Claude, ChatGPT, Claude Code, Codex, or anything that speaks MCP.
 
-Part of [warOnSaaS](https://waronsaas.com).
+Part of [warOnSaaS](https://waronsaas.com). Licensed AGPL-3.0. UI from the wOS UI kit (`lib/ui/wos.css`, synced from warOnSaaS/site with `node scripts/sync-kit.mjs`).
 
 ## WHAT IT DOES
 
 - One board per team. Clients, tasks, notes, docs, ideas, alerts. Plain markdown files in your repo, with history.
 - Sign in with GitHub. Who you are comes from GitHub; what you can see comes from `people.yml`.
-- Access per person: owner sees everything; teammates see their clients; any item can be private to named people.
+- Access per person: owner sees everything; teammates see their clients; `sees: own` limits someone to their own tasks; any item can be private to named people. Enforced by the server: the repo itself goes to the owner only, because GitHub can't hide folders.
 - Hand-offs: "what I did / what's next" goes into the task, the next person's agent picks it up.
 - Review: the agent opens the actual work (linked pages, linked files), says Ready or Not ready, up to 3 issues, then approve / send back / meet.
 - Alerts on hand-offs, comments and changes. Unread count on every reply.
-- Short commands: `start`, `check tasks`, `review`, `new task`, `assign task`, `hand off task`, `status`.
+- Short commands: `start`, `check tasks`, `review`, `new task`, `assign task`, `hand off task`, `status`, `view kanban`.
+- `view kanban` draws the board inside Claude and ChatGPT chats (MCP Apps); `/board` shows it in a browser, by client.
 - Agents act as chief of staff: one line per item, detail on request.
 
 ## HOW PEOPLE JOIN
@@ -53,7 +54,7 @@ Send them `https://<your-instance>/INSTRUCTIONS.md`. They hand it to their agent
 
 ```
 npm install
-npm test                 # 21 end-to-end tests against example-workspace and a fake GitHub
+npm test                 # 23 end-to-end tests against example-workspace and a fake GitHub
 npm run dev              # local server on example-workspace
 npm run check:clean      # no instance names in tracked files
 ```
