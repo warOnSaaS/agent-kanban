@@ -152,7 +152,8 @@ test('ideas board and comments, alerts to everyone, search and fetch', async () 
 test('board: sign-in page without a session, the board with one', async () => {
   assert.match(await (await fetch(`${base}/board`)).text(), /SIGN IN WITH GITHUB/);
   const html = await boardAs('sam');
-  assert.match(html, /agent-kanban · Sam/);
+  assert.match(html, /SIGN OUT SAM/);
+  assert.match(html, /aria-label="IDEAS"/);
   assert.match(html, /aria-label="TO DO"/);
   assert.match(html, /Draft the PTO policy/);
   assert.match(html, /Remote work policy/);
@@ -194,7 +195,7 @@ test('hand off: Jordan logs his finished work and passes the next step to Sam, w
   await sam.call('update_task', { task: id, status: 'doing', comment: 'Booked the walkthrough for Thursday' });
   assert.doesNotMatch((await sam.call('my_day')).text, /Website rebuild and AI case intake\*\*.*Use open_task/);
   assert.match((await jordan.call('my_alerts')).text, /Booked the walkthrough/);
-  assert.match(await boardAs('sam'), /<span class="status">(NEW|REVIEW)<\/span>/);
+  assert.match(await boardAs('sam'), /kcard-turn">YOUR TURN/);
 });
 
 test('unassigned, review, unopened, meet to discuss', async () => {
@@ -510,4 +511,71 @@ test('personal setup link: owner gets one, it names the person and their GitHub 
   assert.match(forged, /You are helping someone join/);
   const jordan = await as('jordan');
   assert.ok(!(await jordan.c.listTools()).tools.some((t) => t.name === 'invite_link'));
+});
+
+const pageAs = (who, p) => fetch(`${base}${p}`, { headers: { cookie: `ak_session=${encodeURIComponent(tokens[who])}` } }).then((r) => r.text());
+const actAs = (who, tool, args, headers = { 'x-requested-with': 'agent-kanban' }) => fetch(`${base}/v1/${tool}`, { method: 'POST', headers: { cookie: `ak_session=${encodeURIComponent(tokens[who])}`, 'content-type': 'application/json', ...headers }, body: JSON.stringify(args) });
+
+test('web board: cards open to pages, review from the page, actions go through the same tools and rules', async () => {
+  const jordan = await as('jordan');
+  const h = await jordan.call('hand_off', { client: 'Acme', title: 'Web review demo', to: 'Sam', needs: 'review', what_i_did: '- Built the onboarding page', whats_next: 'Approve the onboarding page', links: ['https://example.com/onboarding (onboarding page)'] });
+  const id = /id `([^`]+)`/.exec(h.text)[1];
+
+  const board = await boardAs('sam');
+  assert.match(board, new RegExp(`href="/board/t/${id}"`));
+  assert.match(board, /data-task="/);
+  const page = await pageAs('sam', `/board/t/${id}`);
+  assert.match(page, /YOUR REVIEW/);
+  assert.match(page, /href="https:\/\/example\.com\/onboarding"[^>]*>OPEN ONBOARDING PAGE/);
+  assert.match(page, /<li>Built the onboarding page<\/li>/);
+  assert.match(page, /data-tool="update_task"/);
+
+  // Without our header, a cookie alone can't act (another site posting a form).
+  assert.equal((await actAs('sam', 'update_task', { task: id, status: 'done' }, {})).status, 403);
+  // Send back from the page's form.
+  const sent = await actAs('sam', 'hand_off', { task: id, to: 'jordan', what_i_did: 'Reviewed it', whats_next: 'Make the button bigger' });
+  assert.equal(sent.status, 200);
+  assert.match(await pageAs('jordan', `/board/t/${id}`), /SENT BACK/);
+  // Drag to DOING is one update_task call.
+  assert.equal((await actAs('jordan', 'update_task', { task: id, status: 'doing' })).status, 200);
+  assert.match(await pageAs('jordan', `/board/t/${id}`), /<span class="status">DOING<\/span>/);
+  // Casey (Birch only) can't open or act on an Acme task.
+  assert.match(await pageAs('casey', `/board/t/${id}`), /do not have access/);
+  assert.equal((await actAs('casey', 'update_task', { task: id, status: 'done' })).status, 400);
+});
+
+test('web board: MINE filter, ideas column and idea pages, new task from the board, alerts, sign out', async () => {
+  const mine = await pageAs('jordan', '/board?view=mine');
+  assert.match(mine, /aria-current="page">MINE/);
+  assert.doesNotMatch(mine, /Get sign-off on the employee handbook/);
+  const all = await boardAs('jordan');
+  const ideaHref = /href="(\/board\/i\/[^"]+)"/.exec(all)[1];
+  const idea = await pageAs('jordan', ideaHref);
+  assert.match(idea, /TURN INTO A TASK/);
+  assert.equal((await actAs('jordan', 'add_task', { client: 'acme-dental', title: 'From the web board', assignee: 'nobody' })).status, 200);
+  assert.match(await boardAs('jordan'), /From the web board/);
+  const alerts = await pageAs('sam', '/board/alerts');
+  assert.match(alerts, /<h1[^>]*>Alerts/);
+  const out = await fetch(`${base}/logout`, { redirect: 'manual' });
+  assert.match(out.headers.get('set-cookie'), /ak_session=;.*Max-Age=0/);
+});
+
+test('white label: brand/brand.json and a logo restyle the board without touching code', async () => {
+  fs.mkdirSync(path.join(dir, 'brand'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'brand', 'logo.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
+  fs.writeFileSync(path.join(dir, 'brand', 'brand.json'), JSON.stringify({ name: 'Acme Ops', logo: 'logo.svg', scheme: 'light', radius: '8px', fonts: { head: 'Anybody', body: 'Poppins', google: 'family=Anybody:wght@700&family=Poppins:wght@400' }, colors: { bg: '#ffffff', accent: '#4635ff', fg: 'red;} body{display:none' } }));
+  await new Promise((r) => setTimeout(r, 0));
+  const { loadBrand } = await import('../lib/brand.mjs');
+  // The brand cache is per workspace; a fresh Workspace sees the new file.
+  const fresh = new Workspace(ws.store, { name: 'Example Co' });
+  const b = await loadBrand(fresh);
+  assert.equal(b.name, 'Acme Ops');
+  assert.match(b.css, /--accent:#4635ff;/);
+  assert.match(b.css, /--radius:8px;/);
+  assert.match(b.css, /--font-body:"Poppins"/);
+  assert.doesNotMatch(b.css, /display:none/);
+  assert.match(b.fonts, /family=Anybody/);
+  const logo = await fetch(`${base}/brand/logo.svg`);
+  assert.ok([200, 404].includes(logo.status));
+  fs.rmSync(path.join(dir, 'brand'), { recursive: true });
 });

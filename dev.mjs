@@ -4,7 +4,8 @@ import http from 'node:http';
 import path from 'node:path';
 import { Workspace } from './lib/workspace.mjs';
 import { FsStore, GitHubStore } from './lib/store.mjs';
-import { handleMcp, handleBoard, handleInstructions } from './lib/http.mjs';
+import { handleMcp, handleBoard, handleInstructions, handleLogout } from './lib/http.mjs';
+import { handleBrandFile } from './lib/brand.mjs';
 import { handleAuthorize, handleToken, handleRegister, handleGithubCallback, handleLogin, resourceMetadata, serverMetadata, json } from './lib/auth.mjs';
 import { handleRest, openApi } from './lib/rest.mjs';
 
@@ -21,7 +22,12 @@ export function serve(ws, port = 0) {
       if (p === '/oauth/register') return await handleRegister(req, res);
       if (p === '/oauth/github/callback') return await handleGithubCallback(req, res, ws, host);
       if (p === '/login') return handleLogin(req, res, host);
-      if (p === '/board') return await handleBoard(req, res, ws);
+      if (p === '/board' || p.startsWith('/board/')) {
+        const [, , kind, id] = p.split('/');
+        return await handleBoard(req, res, ws, { kind, id: id && decodeURIComponent(id) });
+      }
+      if (p.startsWith('/brand/')) return await handleBrandFile(req, res, ws, decodeURIComponent(p.slice(7)));
+      if (p === '/logout') return handleLogout(req, res);
       if (p === '/instructions' || p === '/INSTRUCTIONS.md') return await handleInstructions(req, res, ws, host);
       if (p.startsWith('/v1/')) return await handleRest(req, res, ws, p.slice(4));
       if (p === '/openapi.json') return json(res, 200, openApi(host));

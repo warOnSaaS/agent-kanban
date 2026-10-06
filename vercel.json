@@ -37,6 +37,22 @@
       "destination": "/api/board"
     },
     {
+      "source": "/board/:kind",
+      "destination": "/api/board?kind=:kind"
+    },
+    {
+      "source": "/board/:kind/:id",
+      "destination": "/api/board?kind=:kind&id=:id"
+    },
+    {
+      "source": "/brand/:file",
+      "destination": "/api/brand?file=:file"
+    },
+    {
+      "source": "/logout",
+      "destination": "/api/logout"
+    },
+    {
       "source": "/instructions",
       "destination": "/api/instructions"
     },
