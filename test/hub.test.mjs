@@ -495,6 +495,7 @@ test('personal setup link: owner gets one, it names the person and their GitHub 
   const url = /(http\S+INSTRUCTIONS\.md\?for=\S+)/.exec(r)[1];
   const v = await (await fetch(url)).text();
   assert.match(v, /You are helping \*\*Riley Chen\*\* join/);
+  assert.match(v, /^# Set up Example Co on agent-kanban \(for Riley Chen\)/);
   assert.match(v, /Sign up with \*\*riley@example\.com\*\*/);
   assert.match(v, /Make sure \*\*riley@example\.com\*\* is one of its emails/);
   assert.match(v, /\[github\.com\/signup\]\(https:\/\/github\.com\/signup\)/);
