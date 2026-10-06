@@ -186,7 +186,7 @@ test('hand off: Jordan logs his finished work and passes the next step to Sam, w
   assert.match(alerts.text, /Next: Walk the managing partner/);
 
   const task = await sam.call('open_task', { task: id });
-  assert.match(task.text, /## Handoff from Jordan Lee to sam/);
+  assert.match(task.text, /## Handoff from Jordan Lee to Sam Rivera/);
   assert.match(task.text, /Rebuilt every page/);
   assert.match(task.text, /acme-law\.vercel\.app/);
   assert.match(task.text, /handed off to sam/);
