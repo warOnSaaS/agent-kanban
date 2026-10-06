@@ -35,6 +35,7 @@ Send them `https://<your-instance>/INSTRUCTIONS.md`. They hand it to their agent
 | `WORKSPACE_NAME` | Shown to people, e.g. `Acme Ops` |
 | `WORKSPACE_TZ` | e.g. `America/New_York` (default UTC) |
 | `WORKSPACE_CONTACT` | Who people message when stuck |
+| `WORKSPACE_CONTACT_EMAIL` | Their email, offered when someone's GitHub account uses a different email |
 | `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET` | Optional, for the ChatGPT GPT. See `docs/chatgpt-gpt.md` |
 | `RESEND_API_KEY` | Optional, emails urgent alerts |
 

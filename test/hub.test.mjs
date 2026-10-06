@@ -18,6 +18,8 @@ process.env.OAUTH_CLIENT_SECRET = 'shh';
 process.env.OAUTH_SECRET = 'test-secret';
 process.env.GITHUB_OAUTH_CLIENT_ID = 'gh-client';
 process.env.GITHUB_OAUTH_CLIENT_SECRET = 'gh-secret';
+process.env.WORKSPACE_CONTACT = 'Sam';
+process.env.WORKSPACE_CONTACT_EMAIL = 'help@example.com';
 
 let srv, dir, base, ws, fakeGithub;
 const tokens = {};
@@ -497,7 +499,9 @@ test('personal setup link: owner gets one, it names the person and their GitHub 
   assert.match(v, /You are helping \*\*Riley Chen\*\* join/);
   assert.match(v, /^# Set up Example Co on agent-kanban \(for Riley Chen\)/);
   assert.match(v, /Sign up with \*\*riley@example\.com\*\*/);
-  assert.match(v, /Make sure \*\*riley@example\.com\*\* is one of its emails/);
+  assert.match(v, /Is \*\*riley@example\.com\*\* the email on that GitHub account\?/);
+  assert.match(v, /Make a new GitHub account with \*\*riley@example\.com\*\*/);
+  assert.match(v, /mailto:help@example\.com\?subject=Example%20Co%20workspace%3A%20my%20GitHub%20username/);
   assert.match(v, /\[github\.com\/signup\]\(https:\/\/github\.com\/signup\)/);
   const forged = await (await fetch(`${base}/INSTRUCTIONS.md?for=${encodeURIComponent('eyJrIjoiaW52aXRlIiwiaWQiOiJyaWxleSJ9.forged')}`)).text();
   assert.doesNotMatch(forged, /riley@example\.com|Riley Chen/);
