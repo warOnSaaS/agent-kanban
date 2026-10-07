@@ -133,6 +133,7 @@ test('the script says how to get the app when it is not installed', () => {
 test('the demo board: no sign-in, changes stay in memory, the example files stay as they are', async () => {
   const page = await get(`${demoBase}/`);
   assert.match(page.text, /Demo board/);
+  assert.match(page.text, /id="app-chatgpt"[\s\S]*chatgpt\.com\/#settings\/Connectors/, 'the demo offers ChatGPT developer mode until it has a GPT');
   assert.equal((await get(`${demoBase}/.well-known/oauth-protected-resource`)).status, 404);
   assert.match((await get(`${demoBase}/board`)).text, /Demo: changes reset/);
 
