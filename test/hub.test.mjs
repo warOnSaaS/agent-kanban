@@ -150,7 +150,7 @@ test('ideas board and comments, alerts to everyone, search and fetch', async () 
 });
 
 test('board: sign-in page without a session, the board with one', async () => {
-  assert.match(await (await fetch(`${base}/board`)).text(), /SIGN IN WITH GITHUB/);
+  assert.match(await (await fetch(`${base}/board`)).text(), /Sign in with GitHub/i);
   const html = await boardAs('sam');
   assert.match(html, /Sign out Sam/);
   assert.match(html, /aria-label="Ideas"/);
@@ -195,7 +195,7 @@ test('hand off: Jordan logs his finished work and passes the next step to Sam, w
   await sam.call('update_task', { task: id, status: 'doing', comment: 'Booked the walkthrough for Thursday' });
   assert.doesNotMatch((await sam.call('my_day')).text, /Website rebuild and AI case intake\*\*.*Use open_task/);
   assert.match((await jordan.call('my_alerts')).text, /Booked the walkthrough/);
-  assert.match(await boardAs('sam'), /chip chip-accent">Your turn/);
+  assert.match(await boardAs('sam'), /ui-chip chip is-accent chip-accent">Your turn/);
 });
 
 test('unassigned, review, unopened, meet to discuss', async () => {
@@ -388,7 +388,7 @@ test('sent back shows up for the original sender, and status shows where everyth
   assert.match(st, /## Done in the last 2 weeks\n(- .*\n)*- \[done\]/);
   assert.match((await sam.call('status', { client: 'acme' })).text, /Where things stand: acme/);
   const board = await boardAs('sam');
-  assert.match(board, /class="kanban"/);
+  assert.match(board, /class="ui-board kanban"/);
   assert.match(board, /aria-label="Doing"/);
   assert.match(board, /Sent back/);
 });
@@ -485,10 +485,10 @@ test('view kanban: the board drawn in the chat, via MCP Apps and ChatGPT widgets
   const page = (await sam.c.readResource({ uri: 'ui://agent-kanban/kanban.html' })).contents[0];
   assert.match(page.text, /ui\/initialize/);
   assert.match(page.text, /window\.openai/);
-  assert.match(page.text, /\.kanban \{/);
+  assert.match(page.text, /\.ui-board\{/);
 
   const r = await sam.c.callTool({ name: 'view_kanban', arguments: {} });
-  assert.match(r.structuredContent.html, /class="kanban"/);
+  assert.match(r.structuredContent.html, /class="ui-board kanban"/);
   assert.match(r.structuredContent.html, /Draft the PTO policy/);
   assert.match(r.structuredContent.summary, /OPEN/);
   assert.match(r.content[0].text, /\/board/);
@@ -535,9 +535,9 @@ test('web board: cards open to pages, review from the page, actions go through t
   assert.match(board, /data-task="/);
   const page = await pageAs('sam', `/board/t/${id}`);
   assert.match(page, /Jordan asked you to review this/);
-  assert.match(page, /<a class="linkcard" href="https:\/\/example\.com\/onboarding"[^>]*><b>Onboarding page<\/b>/);
-  assert.match(page, /<ul class="checks"><li>Built the onboarding page<\/li>/);
-  assert.match(page, /<ol class="steps"><li><div>Approve the onboarding page<\/div>/);
+  assert.match(page, /<a class="ui-linkcard" href="https:\/\/example\.com\/onboarding"[^>]*><b>Onboarding page<\/b>/);
+  assert.match(page, /<ul class="ui-checks"><li>Built the onboarding page<\/li>/);
+  assert.match(page, /<ol class="ui-steps"><li><div>Approve the onboarding page<\/div>/);
   assert.match(page, /data-reveal="send-back"/);
   assert.match(page, /data-tool="update_task"/);
 
@@ -549,7 +549,7 @@ test('web board: cards open to pages, review from the page, actions go through t
   assert.match(await pageAs('jordan', `/board/t/${id}`), /Sent back/);
   // Drag to DOING is one update_task call.
   assert.equal((await actAs('jordan', 'update_task', { task: id, status: 'doing' })).status, 200);
-  assert.match(await pageAs('jordan', `/board/t/${id}`), /<span class="chip chip-outline">Doing<\/span>/);
+  assert.match(await pageAs('jordan', `/board/t/${id}`), /<span class="ui-chip is-outline">Doing<\/span>/);
   // Casey (Birch only) can't open or act on an Acme task.
   assert.match(await pageAs('casey', `/board/t/${id}`), /do not have access/);
   assert.equal((await actAs('casey', 'update_task', { task: id, status: 'done' })).status, 400);
@@ -581,9 +581,10 @@ test('white label: brand/brand.json and a logo restyle the board without touchin
   const fresh = new Workspace(ws.store, { name: 'Example Co' });
   const b = await loadBrand(fresh);
   assert.equal(b.name, 'Acme Ops');
-  assert.match(b.css, /--accent:#4635ff;/);
-  assert.match(b.css, /--radius:8px;/);
-  assert.match(b.css, /--font-body:"Poppins"/);
+  assert.match(b.css, /--ui-accent:#4635ff;/);
+  assert.match(b.css, /--ui-r:8px;/);
+  assert.match(b.css, /--ui-font:"Poppins"/);
+  assert.match(b.attrs, /data-scheme="neutral" data-mode="light"|data-mode="light"/);
   assert.doesNotMatch(b.css, /display:none/);
   assert.match(b.fonts, /family=Anybody/);
   const logo = await fetch(`${base}/brand/logo.svg`);

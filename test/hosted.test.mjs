@@ -188,7 +188,7 @@ test('isolation: a token, cookie or sign-in code from one team never works on an
   assert.equal((await rest('/t/birch-law/v1/my_day', acme.header.replace('ak_session', 'ak_session'))).status, 401);
   // The board, with the Acme cookie: a sign-in page, nothing from Birch Law.
   const board = await (await get('/t/birch-law/board', { cookie: acme.header })).text();
-  assert.match(board, /SIGN IN WITH GITHUB/i);
+  assert.match(board, /Sign in with GitHub/i);
   assert.ok(!/Birch Law board|kanban-col/.test(board));
   // Settings and export: owner of one board is nobody on another.
   assert.equal((await get('/t/birch-law/settings', { cookie: acme.header })).status, 302);

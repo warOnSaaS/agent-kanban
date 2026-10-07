@@ -120,7 +120,7 @@ test('the board page carries the live layer and marks every card', async () => {
   assert.match(html, /id="live-panel"/);
   assert.match(html, /\/board\/live\?v=/);
   assert.match(html, /prefers-reduced-motion:reduce/);
-  assert.match(html, /class="kcard"[^>]*data-item="/);
+  assert.match(html, /class="ui-kcard kcard[^"]*"[^>]*data-item="/);
   assert.doesNotMatch(html, /\u2014/);
 });
 
