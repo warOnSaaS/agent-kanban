@@ -10,7 +10,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Workspace } from '../lib/workspace.mjs';
 import { FsStore } from '../lib/store.mjs';
-import { issueTokens } from '../lib/auth.mjs';
+import { issueTokens, verify } from '../lib/auth.mjs';
 import { serve } from '../dev.mjs';
 
 process.env.OAUTH_CLIENT_ID = 'gpt';
@@ -276,6 +276,12 @@ test('sign in with GitHub, the MCP way: register, authorize, GitHub, code + PKCE
   await c.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`), { requestInit: { headers: { authorization: `Bearer ${again.access_token}` } } }));
   const day = await c.callTool({ name: 'my_day', arguments: {} });
   assert.match(day.content[0].text, /# Jordan Lee/);
+  // The token remembers the app it was issued to, through a refresh, so the live feed can name it.
+  assert.equal(verify(tok.access_token, 'access').a, 'Claude Code');
+  assert.equal(verify(again.access_token, 'access').a, 'Claude Code');
+  await c.callTool({ name: 'add_idea', arguments: { title: 'Live feed check from Claude Code' } });
+  const feed = (await c.callTool({ name: 'recent_activity', arguments: {} })).content[0].text;
+  assert.match(feed, /Claude Code \(Jordan's\) posted the idea "Live feed check from Claude Code"/);
 });
 
 test('the ChatGPT GPT is a fixed client with a secret; REST actions use the same GitHub sign-in', async () => {
@@ -291,6 +297,9 @@ test('the ChatGPT GPT is a fixed client with a secret; REST actions use the same
   assert.equal((await act('my_day', {}, 'forged.token')).status, 401);
   assert.equal((await act('my_day', {}, tok.refresh_token)).status, 401);
   assert.match((await (await act('my_day', {})).json()).result, /# Jordan Lee/);
+  assert.equal(verify(tok.access_token, 'access').a, 'GPT');
+  await act('add_idea', { title: 'Live feed check from a GPT' });
+  assert.match((await (await act('recent_activity', {})).json()).result, /GPT \(Jordan's\) posted the idea "Live feed check from a GPT"/);
   assert.equal((await act('open_client', { client: 'birch' })).status, 400);
   assert.equal((await act('add_client', { name: 'X' })).status, 404);
   const spec = await (await fetch(`${base}/openapi.json`)).json();

@@ -1,0 +1,24 @@
+{
+  "functions": {
+    "api/demo.mjs": {
+      "includeFiles": "{example-workspace/**,vercel.json}"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/demo?__p=/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ]
+}

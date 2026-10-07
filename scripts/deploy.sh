@@ -7,4 +7,5 @@ NAME="$1"
 [ -n "$NAME" ] && [ -f "instances/$NAME.env" ] || { echo "usage: scripts/deploy.sh <instance>  (needs instances/<instance>.env)"; exit 1; }
 npm test >/dev/null && npm run -s check:clean
 set -a; . "instances/$NAME.env"; set +a
-vercel deploy --prod --yes
+# VERCEL_CONFIG in the instance env picks another config, e.g. vercel.demo.json for the demo board.
+vercel deploy --prod --yes ${VERCEL_CONFIG:+--local-config "$VERCEL_CONFIG"}
