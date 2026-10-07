@@ -2,7 +2,7 @@
 
 A shared kanban for people **and their agents**. Tasks, hand-offs, reviews, notes and ideas live as files in a private GitHub repo. Everyone works on them from the agent they already use: Claude, ChatGPT, Claude Code, Codex, or anything that speaks MCP.
 
-Part of [warOnSaaS](https://waronsaas.com). Licensed AGPL-3.0. UI from the wOS UI kit (`lib/ui/wos.css`, synced from warOnSaaS/site with `node scripts/sync-kit.mjs`).
+Part of [warOnSaaS](https://waronsaas.com). Licensed AGPL-3.0. UI from the warOnSaaS ui-design kit (`lib/ui/kit.css`, synced from ui-design main with `node scripts/sync-kit.mjs`). A team restyles its board with `brand/brand.json` (see `lib/brand.mjs`).
 
 Two ways to run it:
 
