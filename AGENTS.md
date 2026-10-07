@@ -27,6 +27,10 @@ How to decide:
 ## Layout
 
 - `lib/`: the server. `workspace.mjs` (people, access, tasks, alerts), `mcp.mjs` (tools), `auth.mjs` (GitHub sign-in over MCP OAuth), `rest.mjs` (the same tools for ChatGPT GPT Actions), `review.mjs`, `board.mjs`, `instructions.mjs`, `connect.mjs` (the front page of app tiles and the `/connect` script for Claude Code and Codex).
+- `lib/hosted.mjs`, `lib/hosted-pages.mjs`, `lib/seed.mjs`: hosted mode (`HOSTED=1`): many teams at `/t/<team>/`, "Create a board", the account-level MCP tools. See `docs/HOSTED.md`.
+- `lib/hosting/`: the product-agnostic hosting layer (team registry, GitHub App, per-team keys, path rebasing, zip, usage meter, the deploy engine). It knows nothing about boards; the CRM can import it as is.
+- `lib/routes.mjs`: every route a board serves, used by `dev.mjs` and by each hosted team.
+- `bin/agent-kanban.mjs`: the `agent-kanban deploy` command ("Move to my own hosting"). See `docs/DESKTOP.md`.
 - `api/`: Vercel entry points. `vercel.json` maps routes; `dev.mjs` mirrors them locally.
 - `example-workspace/`: starter content for a new instance, and the test fixture.
 - `instances/`: local, git-ignored config for the instances you run (`<name>.env`, `<name>.names`).

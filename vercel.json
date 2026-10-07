@@ -82,6 +82,10 @@
       "destination": "/api/connect?app=:app"
     },
     {
+      "source": "/export.zip",
+      "destination": "/api/export"
+    },
+    {
       "source": "/privacy",
       "destination": "/api/home?page=privacy"
     },

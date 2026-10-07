@@ -7,6 +7,7 @@
 import board from './board.mjs';
 import brand from './brand.mjs';
 import connect from './connect.mjs';
+import exportZip from './export.mjs';
 import home from './home.mjs';
 import instructions from './instructions.mjs';
 import logout from './logout.mjs';
@@ -16,7 +17,7 @@ import openapi from './openapi.mjs';
 import v1 from './v1.mjs';
 import wellknown from './wellknown.mjs';
 
-const HANDLERS = { board, brand, connect, home, instructions, logout, mcp, oauth, openapi, v1, wellknown };
+const HANDLERS = { board, brand, connect, export: exportZip, home, instructions, logout, mcp, oauth, openapi, v1, wellknown };
 export const REWRITES = [
   ['/mcp', '/api/mcp'],
   ['/.well-known/oauth-protected-resource', '/api/wellknown?doc=resource'],
@@ -37,6 +38,7 @@ export const REWRITES = [
   ['/openapi.json', '/api/openapi'],
   ['/connect', '/api/connect'],
   ['/connect/:app', '/api/connect?app=:app'],
+  ['/export.zip', '/api/export'],
   ['/privacy', '/api/home?page=privacy'],
   ['/', '/api/home'],
 ].map(([source, destination]) => ({ source, destination }));

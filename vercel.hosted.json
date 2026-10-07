@@ -1,0 +1,25 @@
+{
+  "functions": {
+    "api/hosted.mjs": {
+      "includeFiles": "example-workspace/**",
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/hosted?__path=/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ]
+}

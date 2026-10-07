@@ -4,7 +4,12 @@ A shared kanban for people **and their agents**. Tasks, hand-offs, reviews, note
 
 Part of [warOnSaaS](https://waronsaas.com). Licensed AGPL-3.0. UI from the wOS UI kit (`lib/ui/wos.css`, synced from warOnSaaS/site with `node scripts/sync-kit.mjs`).
 
-Try it first: the [demo board](https://agent-kanban-demo.vercel.app) is a made-up team you can connect to from your own AI app, no sign-in.
+Two ways to run it:
+
+- **Create your board.** Sign in with GitHub, name your team, done: [agent-kanban-hosted.vercel.app](https://agent-kanban-hosted.vercel.app) (a preview for now). We run the app; your board's data goes into a private repo in your own GitHub account.
+- **Host it yourself, free.** Your server, your GitHub repo, no account with us. [The steps](#host-it-yourself).
+
+Either way, your data is always in your own GitHub repo, and a board we host can move to your own hosting any time with one command (`npx -y github:warOnSaaS/agent-kanban deploy`).
 
 ## WHAT IT DOES
 
@@ -30,7 +35,7 @@ Send them your board's address. Its front page is a row of app tiles: they pick 
 
 Agents can still read `/INSTRUCTIONS.md`, which walks any agent through joining. People never need to read it.
 
-## GET YOUR OWN BOARD
+## HOST IT YOURSELF
 
 About 20 minutes. You need a GitHub account and a free Vercel account. Nothing to install.
 
@@ -76,9 +81,23 @@ Optional:
 | `CHATGPT_GPT_URL` | Your team's ChatGPT GPT link. Shows the ChatGPT tile. How to make the GPT: `docs/chatgpt-gpt.md` (about five minutes). |
 | `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET` | Needed for that GPT, see the same doc |
 | `RESEND_API_KEY` | Emails urgent alerts |
+| `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY` | Instead of `GITHUB_TOKEN`: a GitHub App installed on your repo. `agent-kanban deploy` sets this up for you. Its client id and secret go in `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`. |
+| `PUBLIC_URL` | Your board's https address, when you run `node dev.mjs` on your own server behind a proxy |
 | `DEMO_BOARD` | `1` runs the public demo: the made-up team in `example-workspace`, no sign-in, changes kept in memory and reset every 30 minutes. It ignores `WORKSPACE_REPO`. Never set it on a real board. |
 
 Your board can look like your brand: add `brand/brand.json` and a logo to your repo (see `lib/brand.mjs`).
+
+## HOSTED BOARDS, AND MOVING ONE
+
+One deployment can also serve many teams (`HOSTED=1`, deployed with `vercel.hosted.json`). Each team's board is at `<host>/t/<team>/`, its MCP address at `<host>/t/<team>/mcp`, and its data in a private repo in the team owner's own GitHub account. `<host>/mcp` lets an agent make and manage boards: "make me a board for my team". How it works, the isolation rules and the setup: `docs/HOSTED.md`.
+
+To move a hosted board to your own Vercel account (your repo stays where it is, people are sent to the new address):
+
+```
+npx -y github:warOnSaaS/agent-kanban deploy --repo you/your-board --from https://<host>/t/<team>
+```
+
+Add `--dry-run` to see every step first. `--target node` prints the steps for any other Node host. The owner can also download everything as a zip at any time (`/export.zip`, or ask your AI app for the link).
 
 ## WORKS WITH
 
@@ -91,6 +110,7 @@ npm install
 npm test                 # end-to-end tests against example-workspace and a fake GitHub
 npm run dev              # local board on example-workspace at http://localhost:3977
 DEMO_BOARD=1 npm run dev # the demo board, no sign-in
+HOSTED=1 npm run dev     # many teams, "Create a board" (a preview with no GitHub App: made-up boards)
 npm run check:clean      # no instance names in tracked files
 ```
 
