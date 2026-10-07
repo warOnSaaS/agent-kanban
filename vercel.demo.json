@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/demo.mjs": {
-      "includeFiles": "{example-workspace/**,vercel.json}"
+      "includeFiles": "example-workspace/**"
     }
   },
   "rewrites": [

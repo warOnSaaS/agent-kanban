@@ -12,7 +12,7 @@ import { Workspace } from '../lib/workspace.mjs';
 import { FsStore, GitHubStore } from '../lib/store.mjs';
 import { sign } from '../lib/auth.mjs';
 import { appOf, actorFor, liveVersion, recentActivity, track, entry, makeActor } from '../lib/live.mjs';
-import { route } from '../api/demo.mjs';
+import { route, REWRITES } from '../api/demo.mjs';
 import { serve } from '../dev.mjs';
 
 process.env.OAUTH_SECRET = 'test-secret';
@@ -174,6 +174,8 @@ test('GitHub: the version is cached for a moment, then asked with an ETag; the f
 });
 
 test('the demo runs as one function: vercel.json rewrites map to the same handlers', () => {
+  const { rewrites } = JSON.parse(fs.readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  assert.deepEqual(REWRITES, rewrites, 'api/demo.mjs keeps a copy of the vercel.json rewrites: update it when they change');
   assert.deepEqual(route('/board/t/abc').query, { kind: 't', id: 'abc' });
   assert.deepEqual(route('/board/live').query, { kind: 'live' });
   assert.ok(route('/mcp'));
