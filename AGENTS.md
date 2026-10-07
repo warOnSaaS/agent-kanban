@@ -26,7 +26,7 @@ How to decide:
 
 ## Layout
 
-- `lib/`: the server. `workspace.mjs` (people, access, tasks, alerts), `mcp.mjs` (tools), `auth.mjs` (GitHub sign-in over MCP OAuth), `rest.mjs` (the same tools for ChatGPT GPT Actions), `review.mjs`, `board.mjs`, `instructions.mjs`.
+- `lib/`: the server. `workspace.mjs` (people, access, tasks, alerts), `mcp.mjs` (tools), `auth.mjs` (GitHub sign-in over MCP OAuth), `rest.mjs` (the same tools for ChatGPT GPT Actions), `review.mjs`, `board.mjs`, `instructions.mjs`, `connect.mjs` (the front page of app tiles and the `/connect` script for Claude Code and Codex).
 - `api/`: Vercel entry points. `vercel.json` maps routes; `dev.mjs` mirrors them locally.
 - `example-workspace/`: starter content for a new instance, and the test fixture.
 - `instances/`: local, git-ignored config for the instances you run (`<name>.env`, `<name>.names`).

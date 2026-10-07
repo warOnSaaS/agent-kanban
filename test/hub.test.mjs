@@ -433,7 +433,7 @@ test('INSTRUCTIONS.md is one generic file: no secrets, agent identifies itself, 
   assert.ok(v.split('agent-kanban start').length - 1 >= 4, 'every path resumes with agent-kanban start');
   assert.doesNotMatch(v, /then type \*\*start\*\*/);
   assert.match(v, /\[Claude connector settings\]\(https:\/\/claude\.ai\/settings\/connectors\)/);
-  assert.ok(v.includes('```\n   ' + base + '/mcp\n   ```'));
+  assert.ok(v.includes(`connectorUrl=${encodeURIComponent(base + '/mcp')}`), 'the Claude app path is a prefilled install link');
   assert.match(v, /do you have a GitHub account\?/);
   for (const t of Object.values(tokens)) assert.ok(!v.includes(t));
   assert.doesNotMatch(v, /—|calendar/i);

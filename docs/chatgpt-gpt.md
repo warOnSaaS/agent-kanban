@@ -1,6 +1,6 @@
 # ChatGPT: a GPT for your instance (once, about five minutes)
 
-Custom MCP connectors in ChatGPT are read-only on Plus and Pro and patchy on phones. A GPT with Actions works on every paid plan, on the web and in the phone apps. One GPT per instance; share its link with the team. Sign-in is the same GitHub sign-in.
+Custom MCP connectors in ChatGPT are read-only on Plus and Pro and patchy on phones. A GPT with Actions works on every paid plan, on the web and in the phone apps. One GPT per instance; its link goes on the board's front page. Sign-in is the same GitHub sign-in.
 
 Set `OAUTH_CLIENT_ID` (any name, e.g. `agent-kanban-gpt`) and `OAUTH_CLIENT_SECRET` (long random) in the instance's environment first.
 
@@ -20,6 +20,7 @@ Set `OAUTH_CLIENT_ID` (any name, e.g. `agent-kanban-gpt`) and `OAUTH_CLIENT_SECR
      - Token Exchange Method: Default (POST request)
    - **Privacy policy:** `https://<instance>/privacy`
 7. **Create**, share with **Anyone with the link**, copy the link.
+8. Put that link in the instance's environment as `CHATGPT_GPT_URL` and redeploy. The ChatGPT tile appears on the board's front page and opens the GPT in one click.
 
 The first time someone asks it something, ChatGPT shows **Sign in**. GitHub opens; they click Authorize. Only people in `people.yml` get in, even with the link.
 

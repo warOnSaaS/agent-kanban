@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/*.mjs": {
+      "includeFiles": "example-workspace/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/mcp",
@@ -67,6 +72,14 @@
     {
       "source": "/openapi.json",
       "destination": "/api/openapi"
+    },
+    {
+      "source": "/connect",
+      "destination": "/api/connect"
+    },
+    {
+      "source": "/connect/:app",
+      "destination": "/api/connect?app=:app"
     },
     {
       "source": "/privacy",
