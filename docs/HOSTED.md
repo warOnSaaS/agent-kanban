@@ -67,7 +67,7 @@ Deploy: `vercel deploy --prod -A vercel.hosted.json` (every path goes to `api/ho
 ## What the GitHub App needs
 
 - Repository permissions: **Contents** read and write (the board), **Metadata** read, **Administration** read and write (to create the team's repo with the person's own sign-in).
-- Account permissions: **Email addresses** read (so someone invited by email is recognised the first time they sign in). Optional: without it, invite people by GitHub username.
+- Account permissions: **Email addresses** read (so someone invited by email is recognised the first time they sign in). Optional: without it, invite people by GitHub username. In a manifest this permission is called `emails`, not `email_addresses`; GitHub rejects the other name.
 - A callback URL of `<host>/github/callback`. GitHub requires the sign-in return address to match one of the app's callback URLs exactly.
 - Public ("Any account"), so other people can install it.
 - No Setup URL, Device Flow or "Request user authorization during installation" is needed. If the Setup URL is set to `<host>/github/setup`, the board is made the moment the install finishes; otherwise the person comes back to the tab and clicks Create again.
