@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/warOnSaaS/suite/main/packages/manifest/wos-app.schema.json",
+  "id": "board",
+  "name": "Board",
+  "description": "Tasks, hand-offs, reviews, notes and ideas for the team and its agents, kept in the team's own GitHub repo.",
+  "version": "1.1.0",
+  "license": "AGPL-3.0-only",
+  "requires": { "core": ">=0.1" },
+  "tools": "./tools.json",
+  "tables": "./migrations",
+  "server": "./server.mjs",
+  "screens": "./dist/screens.mjs",
+  "icon": "board",
+  "nav": { "label": "Board", "order": 25 },
+  "events": { "emits": ["board.item.changed"], "listens": [] },
+  "needs": { "services": [], "permissions": [], "desktop": [], "env": ["WOS_BOARD_REPO", "WOS_BOARD_GITHUB_TOKEN", "WOS_BOARD_SECRET", "GITHUB_API_BASE"] },
+  "data": { "onDisable": "keep", "exports": ["tasks", "notes", "ideas", "alerts", "people", "files"] }
+}

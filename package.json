@@ -8,7 +8,10 @@
     "check:clean": "node scripts/check-clean.mjs",
     "check": "node --test test/ && node scripts/check-clean.mjs",
     "invite": "node scripts/invite.mjs",
-    "dev:hosted": "HOSTED=1 node dev.mjs"
+    "dev:hosted": "HOSTED=1 node dev.mjs",
+    "tools:json": "node scripts/tools-json.mjs",
+    "build:screens": "node scripts/build-screens.mjs",
+    "check:suite": "node scripts/tools-json.mjs --check && node scripts/build-screens.mjs --check"
   },
   "engines": {
     "node": ">=20"
@@ -37,5 +40,8 @@
     "vercel.hosted.json",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
 }
