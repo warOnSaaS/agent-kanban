@@ -6,14 +6,27 @@ Self-hosted boards are unchanged. Hosted mode only runs when `HOSTED=1`.
 
 ## What a person sees
 
-1. They open the front page and click **Create your board**.
-2. GitHub asks them to sign in to agent-kanban (one click, **Authorize**).
-3. They type the team name and pick where the repo goes: their own account, or an organization.
+1. They open the front page and click **Create your board**. Looking is free: the page shows to everyone.
+2. They type the team name and press **Create the board**. Signed out, the warOnSaaS account prompt appears (GitHub, Google or an email link); they sign in and land back on the form.
+3. Once, GitHub asks them to connect their GitHub account (one click, **Authorize**): the board's repo is made in their own account with their own sign-in, so it is theirs from the first second. Then they pick where the repo goes: their own account, or an organization.
 4. The first time only, GitHub opens in a new tab to install the app on that account. They click **Install** and come back.
 5. They click **Create the board**. We make the private repo `<team>-board` in their account, with them as owner and five example cards, and they land on the board's Connect page at `<host>/t/<team>/`: the app tiles, pointed at `<host>/t/<team>/mcp`.
 6. Settings (owners only) invites people, changes roles, links to the Connect page, downloads everything, and shows the "Move to my own hosting" command.
 
 From an AI app instead: add `<host>/mcp` as a connector and say "make me a board for my team". The account-level tools are `create_board`, `my_boards`, `board_links`, `invite_person`, `export_board` and `move_to_own_hosting`. Each board's own address has every board tool plus `connect_links`, `add_person`, `update_person`, `remove_person`, `clear_examples`, `export_board` and `move_to_own_hosting`. Every button on every page calls one of these tools (`test/parity.test.mjs` fails if a page grows an action no tool covers).
+
+## Sign-in: the warOnSaaS account
+
+The hosted copy runs with `AUTH_PROVIDER=waronsaas`: everyone signs in with their warOnSaaS account at account.waronsaas.com (GitHub, Google or an email link). Self-hosted boards keep their own GitHub sign-in (`AUTH_PROVIDER=github`, the default when no account client is set); nothing changes for them.
+
+- **Look freely, sign in to use.** The front page, Create a board, every team's Connect page, board and Settings render for a signed-out visitor (a team's cards stay private: the board says what it is and offers Sign in). Doing anything (moving a card, adding, commenting, inviting, creating a board) asks for a sign-in: every page carries `prompt.js` from the account, which catches presses on actions and shows the prompt. The API and MCP answer `401 { "error": { "code": "sign_in", "message": "Sign in to your warOnSaaS account" } }`.
+- **One callback for the deployment and every team:** `https://<host>/auth/waronsaas/callback`. The team rides along in the flow (`carry`), so a team's `/t/<team>/login` and `/t/<team>/auth/waronsaas` work, and the session cookie still lands on `/t/<team>` only.
+- **Who someone is on a team:** people.yml, as always. The first sign-in is matched by GitHub login (the `github_login` claim) or verified email, and the account id is saved as `account:`; later sign-ins match on that. Someone not on the team is turned away and the owner is told.
+- **Sign out everywhere:** every cookie and token carries the account session (`sid`) and is checked against the account (cached a minute), so ending sessions on the account ends them here. The board's own Sign out also signs out of the account.
+- **AI apps** (Claude, ChatGPT, Claude Code, Codex) still use the board's `/mcp` OAuth; the sign-in step goes to the account as a connection ("Claude Code via agent-kanban"), which the person can see and end on their account page.
+- **The GitHub App stays** for the data: each team's repo is still reached through it, and creating a board still needs it installed on the team's own account. GitHub is no longer how people sign in; connecting it is one click inside Create a board.
+
+`lib/account-client.mjs` is a copy of the account's client library (`scripts/sync-account.mjs` refreshes it; never edit the copy). `test/account.test.mjs` runs the whole flow against a fake account server.
 
 ## Addresses
 
@@ -61,6 +74,9 @@ Your data does not move: it was always in your repo.
 | `HOSTED_REGISTRY_REPO` | `owner/repo` of the registry; the app must be installed on it |
 | `HOSTED_DEMO` | `1` keeps it in preview mode (made-up boards in memory, no GitHub) even when the app settings are present. With no app settings it is always in preview mode. |
 | `HOSTED_ORIGIN` | Optional, the public address if it differs from the request's host |
+| `AUTH_PROVIDER` | `waronsaas` for the hosted copy. `github` (the default without an account client) keeps GitHub sign-in. |
+| `WOS_ACCOUNT_CLIENT_ID`, `WOS_ACCOUNT_CLIENT_SECRET` | The board's client at the account (from the Accounts lane). Registered callback: `https://<host>/auth/waronsaas/callback`. |
+| `WOS_ACCOUNT_URL` | Optional, `https://account.waronsaas.com` unless you run the account yourself |
 
 Deploy: `vercel deploy --prod -A vercel.hosted.json` (every path goes to `api/hosted.mjs`).
 

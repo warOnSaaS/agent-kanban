@@ -1,7 +1,9 @@
-# Who is on the team and what they can see. Everyone signs in with GitHub.
+# Who is on the team and what they can see. Everyone signs in with GitHub, or with their
+# warOnSaaS account on a hosted board.
 #   github:  their GitHub username. Sign-in is matched on this.
-#   email:   optional. If github is missing, the first sign-in from a GitHub account
-#            with this verified email links them and fills in github automatically.
+#   email:   optional. If github is missing, the first sign-in from an account with this
+#            verified email links them and fills in github automatically.
+#   account: filled in automatically: their warOnSaaS account id after their first sign-in.
 #   role:    owner sees everything (and gets the repo itself); team sees the clients listed.
 #   clients: all, or a list of client folder names.
 #   sees:    optional. "own" = on their clients, only tasks assigned to them, created or handed

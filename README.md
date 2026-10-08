@@ -6,7 +6,7 @@ Part of [warOnSaaS](https://waronsaas.com). Licensed AGPL-3.0. UI from the wOS U
 
 Two ways to run it:
 
-- **Create your board.** Sign in with GitHub, name your team, done: [agent-kanban-hosted.vercel.app](https://agent-kanban-hosted.vercel.app) (a preview for now). We run the app; your board's data goes into a private repo in your own GitHub account.
+- **Create your board.** Sign in with your free warOnSaaS account, name your team, done: [kanban.waronsaas.com](https://kanban.waronsaas.com). We run the app; your board's data goes into a private repo in your own GitHub account. Looking is free: every page shows before you sign in.
 - **Host it yourself, free.** Your server, your GitHub repo, no account with us. [The steps](#host-it-yourself).
 
 Either way, your data is always in your own GitHub repo, and a board we host can move to your own hosting any time with one command (`npx -y github:warOnSaaS/agent-kanban deploy`).
